@@ -1,0 +1,4 @@
+interface:
+  display_name: "Boundary GeoJSON"
+  short_description: "Fetch region boundaries and normalize GeoJSON"
+  default_prompt: "Use $boundary-geojson to fetch a region boundary and normalize it into GeoJSON."
