@@ -1,0 +1,4 @@
+interface:
+  display_name: "Gemini Designer"
+  short_description: "Use Gemini CLI for interface redesign"
+  default_prompt: "Use $gemini-designer to redesign this interface with Gemini CLI."
