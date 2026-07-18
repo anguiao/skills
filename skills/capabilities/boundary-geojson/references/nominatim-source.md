@@ -1,4 +1,4 @@
-# Current Source: Nominatim
+# Nominatim source
 
 ## Endpoints
 
@@ -7,7 +7,7 @@
 
 Use `search` for free-form place names and `lookup` when you already have OSM ids like `R913067`.
 
-## Recommended Parameters
+## Parameters used by the script
 
 For boundary fetches, prefer:
 
@@ -17,14 +17,14 @@ For boundary fetches, prefer:
 - `extratags=1`
 - `namedetails=1`
 
-Useful narrowing parameters:
+Optional narrowing parameters:
 
 - `featureType=country|state|city|settlement`
 - `countrycodes=cn,us,...`
 - `accept-language=zh-CN,en`
 - `polygon_threshold=<float>`
 
-Useful identification parameters:
+Identification parameters:
 
 - `email=<address>` for larger request volumes
 - `osm_ids=R913067,W123456`
@@ -37,9 +37,9 @@ Useful identification parameters:
 - GeoJSON `bbox` must be ordered as `[west, south, east, north]`.
 - `geocodejson` has more stable address classification, but `jsonv2` is usually easier when you need the original Nominatim metadata fields in the output.
 
-## Public Usage Constraints
+## Public usage constraints
 
-The public OSM Foundation service is limited. At the time of writing:
+The public OSM Foundation service is limited:
 
 - Stay at or below 1 request per second.
 - Send a valid custom `User-Agent` or `Referer`.
