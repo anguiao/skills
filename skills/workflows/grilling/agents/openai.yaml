@@ -1,3 +1,7 @@
 interface:
   display_name: "Grilling"
-  short_description: "Stress-test thinking one question at a time"
+  short_description: "Stress-test and refine a draft specification"
+  default_prompt: "Use $grilling to stress-test and refine this draft spec one question at a time."
+
+policy:
+  allow_implicit_invocation: false
