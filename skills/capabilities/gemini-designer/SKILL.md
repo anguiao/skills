@@ -1,101 +1,59 @@
 ---
 name: gemini-designer
-description: Use Gemini CLI as an external design partner for creating, redesigning, or polishing frontend screens and web interfaces. Use when Codex is asked to use Gemini CLI for interface design, redesign, visual critique, layout direction, UI polish, frontend design review, or a second-pass design proposal, including cases where Gemini may directly edit code while keeping functionality and business logic stable.
+description: Use Gemini as an independent design partner to create, redesign, polish, or review frontend interfaces while preserving application logic. Use for visual hierarchy, layout, responsive behavior, interaction states, and presentation-layer implementation.
 ---
 
 # Gemini Designer
 
 ## Goal
 
-Use Gemini CLI for an outside interface design pass, then turn that pass into concrete frontend changes. Gemini may edit files when useful, but its main job is visual/interface design; preserve existing functionality and application logic unless the user explicitly asks to change behavior.
+Use Gemini as an independent product design partner, not as the final authority. Provide accurate interface context, filter its recommendations or patches through the actual codebase, and verify the resulting implementation before delivery.
 
-## Quick Start
-
-1. Read the local project instructions, frontend stack, current route or component, and user goal.
-2. Gather enough interface context: relevant source files, current screenshot or visual observations when available, current design constraints, and any failing UX problem.
-3. Run `scripts/select_gemini_model.py` to fetch the latest Gemini model list from Models.dev and choose a Pro model when available.
-4. Read `references/gemini-cli.md` before invoking Gemini CLI.
-5. Ask Gemini CLI for a structured design critique, redesign plan, or design-focused edit.
-6. Inspect Gemini's changes or recommendations, keep only what fits the repo, and verify the result in the browser or available test workflow.
+Read [the current invocation reference](references/antigravity-cli.md) before calling Gemini.
 
 ## Workflow
 
-### 1. Frame the design brief
+1. Read repository instructions, the frontend stack, the target route or component, and the user's goal.
+2. Inspect the relevant source. For an existing interface, capture or inspect both desktop and mobile states when possible.
+3. Write a concise design brief covering the goal, audience, required content, hard constraints, and permitted edit scope.
+4. Choose critique, proposal, implementation draft, or review mode.
+5. Give Gemini only the source excerpts, diff, and visual observations needed for the task.
+6. Review Gemini's response and apply approved changes with the caller's own file-editing tools.
+7. Inspect the resulting diff, run the repository's verification workflow, and check key viewports and states in a browser.
 
-Build a short brief before calling Gemini:
+## Choose a mode
 
-- Target screen, route, component, or screenshot.
-- User intent: create, redesign, polish, critique, compare variants, or fix a specific visual problem.
-- Product context and audience.
-- Hard constraints from `AGENTS.md`, design systems, component libraries, accessibility requirements, responsive breakpoints, and existing copy.
-- What Gemini should return or edit: diagnosis, layout direction, visual hierarchy, interaction states, and implementation notes.
+- **Critique**: Diagnose hierarchy, density, readability, or responsive problems. Request prioritized, actionable findings.
+- **Proposal**: Define a new screen or redesign direction. Request structure and file-level implementation guidance.
+- **Implementation draft**: Request an implementation-ready patch or replacement content. Gemini must not access or edit the workspace; the caller reviews and applies the result.
+- **Implementation review**: Provide the implemented diff and visual observations. Request only remaining actionable issues.
 
-Do not ask Gemini for generic inspiration. Make the prompt interface-specific and include the constraints that would otherwise be easy to violate.
+Honor the user's choice between Gemini Pro and Gemini Flash; default to Pro when no preference is given. Use the latest available version and highest reasoning level within the chosen family. If that family is unavailable, stop and report the blocker rather than switching families without the user's approval.
 
-### 2. Select the Gemini model
+## Write the design brief
 
-Always query Models.dev before choosing a model, because Gemini availability changes over time.
+Include:
 
-```bash
-python <skill-dir>/scripts/select_gemini_model.py
-```
+- The target page, route, component, or screenshot.
+- The user task, audience, and observable success criteria.
+- Content, interactions, and product semantics that must remain intact.
+- Design system, component library, CSS approach, responsive, and accessibility constraints.
+- Source excerpts or diffs with repository-relative file paths.
+- Business logic, data flow, routing, authentication, persistence, validation, and public APIs that must not change.
 
-Use the returned model id with `gemini --model <model-id>`. The selector prefers Google Gemini Pro models, excludes non-text variants such as embedding, image, live audio, and TTS models, and ignores deprecated models. If no Pro model is available, use the best available text-capable Gemini model.
+Do not request generic inspiration. Require Gemini to map findings, recommendations, and proposed changes to specific files, components, or states.
 
-### 3. Choose the Gemini role
+## Apply safety boundaries
 
-- Use **critic mode** when the interface already exists and the user wants polish, visual QA, or redesign direction.
-- Use **designer mode** when the user wants a new screen and the repo already has a stack or design system.
-- Use **editor mode** when Gemini should directly edit frontend files. Tell Gemini to focus on visual/interface changes and preserve behavior.
-- Use **implementation reviewer mode** after local edits when a second pass should catch visual regressions, responsive issues, or weak hierarchy.
+- Do not provide secrets, `.env` files, credentials, production customer data, or irrelevant private context.
+- Do not grant Gemini filesystem, terminal, network, or workspace access. Treat the invocation as text-only.
+- Inspect the working tree before applying a patch and the complete diff afterward. Preserve existing user changes.
+- Limit proposed changes to layout, styling, component composition, copy density, responsive behavior, and visible UI states unless the user explicitly requests behavioral changes.
+- Reject incomplete, malformed, out-of-scope, or context-incompatible patches instead of forcing them into the codebase.
+- If the invocation path is unavailable or fails, report the blocker. Continue with local design judgment when appropriate, but never fabricate Gemini output.
 
-### 4. Call Gemini CLI safely
+## Verify and report
 
-Prefer headless Gemini CLI calls so the result is easy to capture and compare. Load `references/gemini-cli.md` for command patterns, authentication notes, sandbox options, and prompt templates.
+Check desktop and mobile layout, text overflow, primary-action visibility, focus treatment, contrast, and applicable empty, loading, error, hover, and active states. Invoke one additional implementation-review pass only when the interface is complex or the first result still has visible weaknesses.
 
-Default behavior:
-
-- Prefer analysis and recommendations when the request is ambiguous.
-- Allow Gemini to edit code for design tasks when that is the fastest route, but explicitly constrain it to visual structure, styling, layout, component composition, copy density, responsive behavior, and UI states.
-- Tell Gemini not to change business logic, API contracts, routing semantics, data fetching, persistence, authentication, validation rules, or unrelated tests.
-- Inspect `git diff` after Gemini edits before continuing.
-- If Gemini CLI is missing, unauthenticated, blocked by network, or fails, report that clearly and continue with local design judgment when possible.
-- Do not paste secrets, private credentials, or unnecessary proprietary context into Gemini.
-
-### 5. Convert feedback into edits
-
-Filter Gemini's suggestions through the actual codebase:
-
-- Keep changes consistent with the existing framework, routing, state management, component conventions, and CSS system.
-- Prefer concrete improvements to hierarchy, spacing, responsive structure, contrast, interaction states, and information density.
-- Avoid broad rewrites when Gemini proposes changes outside the requested scope.
-- Preserve working behavior unless the redesign explicitly changes it.
-
-### 6. Verify visually
-
-Run the relevant dev server or static preview, then inspect the result. For frontend apps, capture screenshots or use browser verification when available.
-
-Check:
-
-- Desktop and mobile layout.
-- Text overflow, clipping, and overlap.
-- Primary action visibility.
-- Empty, loading, error, hover, focus, and active states when applicable.
-- Asset loading and color contrast.
-
-Loop once with Gemini in implementation reviewer mode only when the interface is visually complex or the first result still feels weak.
-
-## Output
-
-When responding to the user, summarize:
-
-- Whether Gemini CLI was used successfully.
-- Which Gemini model was selected from Models.dev, or why model selection was blocked.
-- The design direction chosen from Gemini's feedback.
-- The files changed and how to preview the interface.
-- Any verification performed or blocked.
-
-## Resources
-
-- Run `scripts/select_gemini_model.py` to fetch and choose the current Gemini model from Models.dev.
-- Read `references/gemini-cli.md` for Gemini CLI command patterns and interface-design prompt templates.
+Tell the user whether Gemini ran successfully, which Gemini model was selected, the adopted design direction, the files changed by the caller, and which verification steps passed or remained blocked.
