@@ -235,20 +235,6 @@ function companionUrl() {
   return 'http://' + urlHostForHttp(URL_HOST) + ':' + PORT + '/?key=' + TOKEN;
 }
 
-function browserLauncherForPlatform(url, {
-  platform = process.platform,
-  osRelease = require('os').release(),
-  env = process.env
-} = {}) {
-  const isWSL = platform === 'linux' && /microsoft/i.test(osRelease);
-  if (platform === 'darwin') return { bin: 'open', args: [url] };
-  if (platform === 'win32' || isWSL) {
-    return { bin: 'rundll32.exe', args: ['url.dll,FileProtocolHandler', url] };
-  }
-  if (env.DISPLAY || env.WAYLAND_DISPLAY) return { bin: 'xdg-open', args: [url] };
-  return null;
-}
-
 function isRegularFileInsideContentDir(filePath) {
   let stat, realContentDir, realFilePath;
   try {
@@ -471,30 +457,6 @@ function broadcast(msg) {
   }
 }
 
-// Best-effort: open the user's browser the first time a screen is actually ready
-// to show. Skips when disabled, on a non-loopback (remote) bind, or when a
-// browser is already connected. Override the launcher with BRAINSTORM_OPEN_CMD.
-let browserOpened = false;
-function maybeOpenBrowser() {
-  if (browserOpened) return;
-  browserOpened = true;
-  if (!process.env.BRAINSTORM_OPEN) return; // opt-in: only after the user approves the companion
-  if (HOST !== '127.0.0.1' && HOST !== 'localhost') return;
-  if (clients.size > 0) return; // the user already opened it
-  const url = companionUrl(); // must carry the key or the gate 403s it
-  const cp = require('child_process');
-  // Operator-provided launcher: run as given (this env var is trusted operator input).
-  if (process.env.BRAINSTORM_OPEN_CMD) {
-    try { cp.exec(process.env.BRAINSTORM_OPEN_CMD + ' ' + JSON.stringify(url), () => {}); } catch (e) { /* best effort */ }
-    return;
-  }
-  // Platform launchers: pass the URL as an argv element via execFile (no shell),
-  // so a url-host containing shell metacharacters can't inject a command.
-  const launcher = browserLauncherForPlatform(url);
-  if (!launcher) return; // headless: nothing to open
-  try { cp.execFile(launcher.bin, launcher.args, () => {}); } catch (e) { /* best effort */ }
-}
-
 // ========== Activity Tracking ==========
 
 // Idle timeout: shut down after this long with no activity. Default 4 hours;
@@ -551,7 +513,6 @@ function startServer() {
         const eventsFile = path.join(STATE_DIR, 'events');
         if (fs.existsSync(eventsFile)) fs.unlinkSync(eventsFile);
         console.log(JSON.stringify({ type: 'screen-added', file: filePath }));
-        maybeOpenBrowser();
       } else {
         console.log(JSON.stringify({ type: 'screen-updated', file: filePath }));
       }
@@ -665,7 +626,6 @@ module.exports = {
   computeAcceptKey,
   encodeFrame,
   decodeFrame,
-  browserLauncherForPlatform,
   OPCODES,
   MAX_FRAME_PAYLOAD_BYTES
 };

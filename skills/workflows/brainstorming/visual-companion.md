@@ -35,9 +35,9 @@ The server watches a directory for HTML files and serves the newest one to the b
 Resolve all `scripts/...` paths relative to this guide's directory, not the current project. Set `SKILL_DIR` to the absolute path of the directory containing this guide.
 
 ```bash
-# Start AFTER the user approves the companion. --open auto-opens their browser on
-# the first screen; --project-dir persists mockups and enables same-port restart.
-"$SKILL_DIR/scripts/start-server.sh" --project-dir /path/to/project --open
+# Start AFTER the user approves the companion. --project-dir persists mockups
+# and enables same-port restart.
+"$SKILL_DIR/scripts/start-server.sh" --project-dir /path/to/project
 
 # Returns: {"type":"server-started","port":52341,
 #           "url":"http://localhost:52341/?key=ab12…",
@@ -45,7 +45,13 @@ Resolve all `scripts/...` paths relative to this guide's directory, not the curr
 #           "state_dir":"/path/to/project/.brainstorming/12345-1706000000/state"}
 ```
 
-Save `screen_dir` and `state_dir` from the response. With `--open`, the browser opens itself when you push the first screen — you don't need to ask the user to open it, but still share the URL as a fallback (headless/remote setups won't auto-open).
+On Windows, use the PowerShell script with the same options:
+
+```powershell
+& "$SKILL_DIR/scripts/start-server.ps1" --project-dir "C:\path\to\project"
+```
+
+Save `screen_dir` and `state_dir` from the response. Share the complete `url` and ask the user to open it. The scripts never open a browser automatically.
 
 **The URL contains a session key (`?key=…`).** The server rejects any request
 without it, so always give the user the **complete** URL from the `url` field —
@@ -57,7 +63,7 @@ without repeating it.
 
 **Finding connection info:** The server writes its startup JSON to `$STATE_DIR/server-info`. If you launched the server in the background and didn't capture stdout, read that file to get the URL and port. When using `--project-dir`, check `<project>/.brainstorming/` for the session directory.
 
-**Note:** Pass the project root as `--project-dir` so mockups persist in `.brainstorming/` and survive server restarts. Without it, files go to `/tmp` and get cleaned up. Remind the user to add `.brainstorming/` to `.gitignore` if it's not already there.
+**Note:** Pass the project root as `--project-dir` so mockups persist in `.brainstorming/` and survive server restarts. Without it, files go to the operating system's temporary directory and get cleaned up. Remind the user to add `.brainstorming/` to `.gitignore` if it's not already there.
 
 ## Launching the Server
 
@@ -65,11 +71,11 @@ The server must remain running across conversation turns.
 
 - If the environment preserves background processes, use the default mode.
 - If it reaps detached processes, use `--foreground` in a persistent or asynchronous terminal session.
-- The script automatically selects foreground mode when it detects Codex or a Windows-like shell.
+- The Bash script automatically selects foreground mode when it detects Codex or a Windows-like shell. The PowerShell script defaults to a hidden background process.
 - After launch, use the returned JSON or `$STATE_DIR/server-info` to obtain the session URL and directories.
 
 ```bash
-"$SKILL_DIR/scripts/start-server.sh" --project-dir /path/to/project --open
+"$SKILL_DIR/scripts/start-server.sh" --project-dir /path/to/project
 ```
 
 If the URL is unreachable from your browser (common in remote/containerized setups), bind a non-loopback host:
@@ -271,7 +277,11 @@ If `$STATE_DIR/events` doesn't exist, the user didn't interact with the browser 
 "$SKILL_DIR/scripts/stop-server.sh" "$SESSION_DIR"
 ```
 
-If the session used `--project-dir`, mockup files persist in `.brainstorming/` for later reference. Only `/tmp` sessions get deleted on stop.
+```powershell
+& "$SKILL_DIR/scripts/stop-server.ps1" "$SESSION_DIR"
+```
+
+If the session used `--project-dir`, mockup files persist in `.brainstorming/` for later reference. Only sessions created in the operating system's temporary directory get deleted on stop.
 
 ## Reference
 
