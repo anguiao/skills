@@ -75,6 +75,7 @@ digraph brainstorming {
 - Propose 2-3 different approaches with trade-offs
 - Present options conversationally with your recommendation and reasoning
 - Lead with your recommended option and explain why
+- YAGNI ruthlessly - remove unnecessary features from every approach and design
 
 **Presenting the design:**
 
@@ -123,15 +124,6 @@ After the spec review loop passes, ask the user to review the written draft:
 > "Draft spec written to `<path>`. Please review it and let me know if you want to make any changes."
 
 Stop after asking for review. If the user later requests changes, update the same spec and re-run the self-review. Do not start implementation, commit the spec, or invoke another workflow unless the user explicitly requests that as a separate next step.
-
-## Key Principles
-
-- **One question at a time** - Don't overwhelm with multiple questions
-- **Multiple choice preferred** - Easier to answer than open-ended when possible
-- **YAGNI ruthlessly** - Remove unnecessary features from all designs
-- **Explore alternatives** - Always propose 2-3 approaches before settling
-- **Incremental validation** - Present design, get approval before moving on
-- **Be flexible** - Go back and clarify when something doesn't make sense
 
 ## Visual Companion
 
