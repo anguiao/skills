@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bootstrap"
+  short_description: "Bootstrap projects into verified working baselines"
+  default_prompt: "Use $bootstrap to create a new project from scratch."
