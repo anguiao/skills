@@ -1,0 +1,7 @@
+interface:
+  display_name: "Implement"
+  short_description: "Implement approved specs with verified results"
+  default_prompt: "Use $implement to implement this approved spec and verify the result."
+
+policy:
+  allow_implicit_invocation: false
