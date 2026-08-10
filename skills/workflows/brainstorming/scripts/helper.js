@@ -15,7 +15,6 @@
   if (typeof window === 'undefined') return;
 
   let ws = null;
-  let eventQueue = [];
   let reconnectDelay = MIN_RECONNECT_MS;
   let reconnectTimer = null;
   let disconnectedSince = null;
@@ -86,8 +85,6 @@
       reconnectDelay = MIN_RECONNECT_MS;
       tombstoneShown = false;
       setStatus('connected');
-      eventQueue.forEach(e => ws.send(JSON.stringify(e)));
-      eventQueue = [];
       // Recovered from a tombstoned outage (e.g. the server restarted on the same
       // port) — reload through the keyed bootstrap when possible so the cookie is
       // refreshed before the visible URL returns to bare /.
@@ -116,52 +113,6 @@
     // Let onclose own reconnection so we don't schedule it twice.
     ws.onerror = () => { try { ws.close(); } catch (e) {} };
   }
-
-  function sendEvent(event) {
-    event.timestamp = Date.now();
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify(event));
-    } else {
-      eventQueue.push(event);
-    }
-  }
-
-  // Capture clicks on choice elements
-  document.addEventListener('click', (e) => {
-    const target = e.target.closest('[data-choice]');
-    if (!target) return;
-
-    sendEvent({
-      type: 'click',
-      text: target.textContent.trim(),
-      choice: target.dataset.choice,
-      id: target.id || null
-    });
-
-  });
-
-  // Frame UI: selection tracking
-  window.selectedChoice = null;
-
-  window.toggleSelect = function(el) {
-    const container = el.closest('.options') || el.closest('.cards');
-    const multi = container && container.dataset.multiselect !== undefined;
-    if (container && !multi) {
-      container.querySelectorAll('.option, .card').forEach(o => o.classList.remove('selected'));
-    }
-    if (multi) {
-      el.classList.toggle('selected');
-    } else {
-      el.classList.add('selected');
-    }
-    window.selectedChoice = el.dataset.choice;
-  };
-
-  // Expose API for explicit use
-  window.brainstorm = {
-    send: sendEvent,
-    choice: (value, metadata = {}) => sendEvent({ ...metadata, type: 'choice', choice: value })
-  };
 
   connect();
 })();

@@ -1,6 +1,6 @@
 # Visual Companion Guide
 
-Browser-based visual brainstorming companion for showing mockups, diagrams, and options.
+Browser-based visual brainstorming companion for showing mockups, diagrams, options, and interactive prototypes.
 
 ## When to Use
 
@@ -22,13 +22,15 @@ Decide per-question, not per-session. The test: **would the user understand this
 - **Technical decisions** — API design, data modeling, architectural approach selection
 - **Clarifying questions** — anything where the answer is words, not a visual preference
 
-A question *about* a UI topic is not automatically a visual question. "What kind of wizard do you want?" is conceptual — use the conversation. "Which of these wizard layouts feels right?" is visual — use the browser.
+A question *about* a UI topic is not automatically a visual question. "What kind of wizard do you want?" is conceptual — use the conversation. "Which of these wizard layouts feels right?" is visual — show the layouts in the browser, then ask the user to answer in the conversation.
 
 ## How It Works
 
-The server watches a directory for HTML files and serves the newest one to the browser. You write HTML content to `screen_dir`, the user sees it in their browser and can click to select options. Selections are recorded to `state_dir/events` that you read on your next turn.
+The server watches a directory for HTML files and serves the newest one to the browser. You write HTML content to `screen_dir`, and the user sees it in their browser. Label alternatives clearly (for example A, B, and C), then ask the user to respond in the conversation.
 
-**Content fragments vs full documents:** If your HTML file starts with `<!DOCTYPE` or `<html`, the server serves it as-is (just injects the helper script). Otherwise, the server automatically wraps your content in the frame template — adding the header, CSS theme, connection status, and all interactive infrastructure. **Write content fragments by default.** Only write full documents when you need complete control over the page.
+Page-local controls demonstrate prototype states and flows. The user submits choices and feedback in the conversation.
+
+**Content fragments vs full documents:** If your HTML file starts with `<!DOCTYPE` or `<html`, the server serves it as-is (just injects the helper script). Otherwise, the server automatically wraps your content in the frame template — adding the header, CSS theme, connection status, and live-reload support. **Write content fragments by default.** Only write full documents when you need complete control over the page.
 
 ## Starting a Session
 
@@ -57,7 +59,7 @@ Save `screen_dir` and `state_dir` from the response. Share the complete `url` an
 without it, so always give the user the **complete** URL from the `url` field —
 never strip the query string, and never hand out a bare `http://host:port`. The
 key gates HTTP and WebSocket access so a stray browser tab or another machine on
-the network can't read the screens or inject events. After the first load the
+the network can't read the screens or connect to the session. After the first load the
 browser remembers the key via a cookie, so reloads and `/files/*` assets work
 without repeating it.
 
@@ -101,12 +103,11 @@ Use `--url-host` to control what hostname is printed in the returned URL JSON.
 2. **Tell user what to expect and end your turn:**
    - Share the URL when the session starts, and again only if it changes or the user asks for it
    - Give a brief text summary of what's on screen (e.g., "Showing 3 layout options for the homepage")
-   - Ask them to respond in the conversation: "Take a look and let me know what you think. Click to select an option if you'd like."
+   - Ask them to respond in the conversation: "Take a look, then reply here with A, B, or C, or describe what you would change."
 
 3. **On your next turn** — after the user responds in the conversation:
-   - Read `$STATE_DIR/events` if it exists — this contains the user's browser interactions (clicks, selections) as JSON lines
-   - Merge with the user's message to get the full picture
-   - The conversation message is the primary feedback; `state_dir/events` provides structured interaction data
+   - Treat the user's conversation message as the complete feedback
+   - If the answer is ambiguous, ask a focused follow-up question in the conversation
 
 4. **Iterate or advance** — if feedback changes current screen, write a new file (e.g., `layout-v2.html`). Only move to the next question when the current step is validated.
 
@@ -125,7 +126,7 @@ Use `--url-host` to control what hostname is printed in the returned URL JSON.
 
 ## Writing Content Fragments
 
-Write just the content that goes inside the page. The server wraps it in the frame template automatically (header, theme CSS, connection status, and all interactive infrastructure).
+Write just the content that goes inside the page. The server wraps it in the frame template automatically (header, theme CSS, connection status, and live-reload support).
 
 **Minimal example:**
 
@@ -134,14 +135,14 @@ Write just the content that goes inside the page. The server wraps it in the fra
 <p class="subtitle">Consider readability and visual hierarchy</p>
 
 <div class="options">
-  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+  <div class="option">
     <div class="letter">A</div>
     <div class="content">
       <h3>Single Column</h3>
       <p>Clean, focused reading experience</p>
     </div>
   </div>
-  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+  <div class="option">
     <div class="letter">B</div>
     <div class="content">
       <h3>Two Column</h3>
@@ -153,15 +154,19 @@ Write just the content that goes inside the page. The server wraps it in the fra
 
 That's it. No `<html>`, no CSS, no `<script>` tags needed. The server provides all of that.
 
+## Interactive Prototypes
+
+Use page-local interactions when the user benefits from experiencing a state or flow: opening a menu, switching tabs, stepping through a wizard, or testing responsive behavior. Keep these interactions self-contained in the page. Ask the user to report their choice, observations, and requested changes in the conversation.
+
 ## CSS Classes Available
 
 The frame template provides these CSS classes for your content:
 
-### Options (A/B/C choices)
+### Options (A/B/C alternatives)
 
 ```html
 <div class="options">
-  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+  <div class="option">
     <div class="letter">A</div>
     <div class="content">
       <h3>Title</h3>
@@ -171,19 +176,11 @@ The frame template provides these CSS classes for your content:
 </div>
 ```
 
-**Multi-select:** Add `data-multiselect` to the container to let users select multiple options. Each click toggles the item's selected styling.
-
-```html
-<div class="options" data-multiselect>
-  <!-- same option markup — users can select/deselect multiple -->
-</div>
-```
-
 ### Cards (visual designs)
 
 ```html
 <div class="cards">
-  <div class="card" data-choice="design1" onclick="toggleSelect(this)">
+  <div class="card">
     <div class="card-image"><!-- mockup content --></div>
     <div class="card-body">
       <h3>Name</h3>
@@ -241,24 +238,11 @@ The frame template provides these CSS classes for your content:
 - `.section` — content block with bottom margin
 - `.label` — small uppercase label text
 
-## Browser Events Format
-
-When the user clicks options in the browser, their interactions are recorded to `$STATE_DIR/events` (one JSON object per line). The file is cleared automatically when you push a new screen.
-
-```jsonl
-{"type":"click","choice":"a","text":"Option A - Simple Layout","timestamp":1706000101}
-{"type":"click","choice":"c","text":"Option C - Complex Grid","timestamp":1706000108}
-{"type":"click","choice":"b","text":"Option B - Hybrid","timestamp":1706000115}
-```
-
-The full event stream shows the user's exploration path — they may click multiple options before settling. The last `choice` event is typically the final selection, but the pattern of clicks can reveal hesitation or preferences worth asking about.
-
-If `$STATE_DIR/events` doesn't exist, the user didn't interact with the browser — use only their conversation message.
-
 ## Design Tips
 
 - **Scale fidelity to the question** — wireframes for layout, polish for polish questions
 - **Explain the question on each page** — "Which layout feels more professional?" not just "Pick one"
+- **Label alternatives clearly** — use stable labels such as A, B, and C that the user can cite in the conversation
 - **Iterate before advancing** — if feedback changes current screen, write a new version
 - **2-4 options max** per screen
 - **Use representative content when it matters** — prefer project assets or user-provided material; when those are unavailable, use suitable external sources such as Unsplash. Avoid placeholders that hide real design constraints.

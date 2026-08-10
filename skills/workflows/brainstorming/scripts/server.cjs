@@ -407,9 +407,6 @@ function handleUpgrade(req, socket) {
       buffer = buffer.slice(result.bytesConsumed);
 
       switch (result.opcode) {
-        case OPCODES.TEXT:
-          handleMessage(result.payload.toString());
-          break;
         case OPCODES.CLOSE:
           socket.end(encodeFrame(OPCODES.CLOSE, Buffer.alloc(0)));
           clients.delete(socket);
@@ -432,22 +429,6 @@ function handleUpgrade(req, socket) {
 
   socket.on('close', () => clients.delete(socket));
   socket.on('error', () => clients.delete(socket));
-}
-
-function handleMessage(text) {
-  let event;
-  try {
-    event = JSON.parse(text);
-  } catch (e) {
-    console.error('Failed to parse WebSocket message:', e.message);
-    return;
-  }
-  touchActivity();
-  console.log(JSON.stringify({ source: 'user-event', ...event }));
-  if (event && event.choice) {
-    const eventsFile = path.join(STATE_DIR, 'events');
-    fs.appendFileSync(eventsFile, JSON.stringify(event) + '\n');
-  }
 }
 
 function broadcast(msg) {
@@ -510,8 +491,6 @@ function startServer() {
 
       if (!knownFiles.has(filename)) {
         knownFiles.add(filename);
-        const eventsFile = path.join(STATE_DIR, 'events');
-        if (fs.existsSync(eventsFile)) fs.unlinkSync(eventsFile);
         console.log(JSON.stringify({ type: 'screen-added', file: filePath }));
       } else {
         console.log(JSON.stringify({ type: 'screen-updated', file: filePath }));
