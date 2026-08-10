@@ -1,0 +1,7 @@
+interface:
+  display_name: "Review"
+  short_description: "Interactively review and refine implemented work"
+  default_prompt: "Use $review to interactively review and refine this implemented work."
+
+policy:
+  allow_implicit_invocation: false
