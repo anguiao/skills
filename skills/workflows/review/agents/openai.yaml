@@ -1,7 +1,7 @@
 interface:
   display_name: "Review"
-  short_description: "Interactively review and refine implemented work"
-  default_prompt: "Use $review to interactively review and refine this implemented work."
+  short_description: "User-led review with an independent closing pass"
+  default_prompt: "Use $review to establish the scope, wait for me to choose each topic, then run an independent closing pass."
 
 policy:
   allow_implicit_invocation: false

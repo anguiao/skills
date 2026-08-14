@@ -1,12 +1,16 @@
 ---
 name: review
-description: Review an implementation interactively against its spec and refine it to completion.
+description: Review and refine an implementation against its spec through user-led topics and an independent closing pass.
 ---
 
-Review the implemented spec and its implementation interactively until we reach a shared understanding of the final result. Establish the smallest relevant review range from the user's fixed point or the commit history, exclude unrelated changes, and report the range before proceeding.
+Establish the smallest relevant review scope from the user's fixed point or commit history, excluding unrelated changes. Read only enough to explain it, then report the scope and wait for the user to choose the first topic.
 
-Follow the user's lead one topic at a time. Inspect the relevant code, tests, spec, and surrounding context; explain the current behavior, trade-offs, and recommendation; and evaluate suggestions against the codebase rather than accepting them blindly. Apply requested or agreed changes directly, keep the same spec synchronized with final decisions, and run focused checks after each coherent change. Stay within the implemented feature unless a concrete risk requires broader inspection.
+For each user-selected topic, inspect the relevant spec, code, tests, and context; explain the current behavior, trade-offs, and recommendation; and evaluate suggestions against the codebase. Wait for the user's decision before moving on. Apply agreed changes, keep the spec synchronized, and run focused checks after each coherent change.
 
-When the user indicates that the review is ready to finish, inspect the review-stage changes and affected areas. Expand to the full implementation only when the review materially changed the architecture, behavior, or spec, or when the user requests a full pass. Run fresh relevant checks, resolve any findings, and report unresolved risks.
+Queue material issues outside the current topic; once it is resolved, let the user choose whether to review the next queued issue.
 
-After the checks pass and the user approves the result, update the spec's status using the repository's convention, defaulting to `completed`.
+When the user has no more topics, use one fresh subagent when available to review the fixed scope and review-stage changes for spec fidelity, code quality, and regression risk. Give it only the current spec, scope, and raw implementation, and tell it to return all material findings without making changes.
+
+Verify the findings against the codebase, then present all confirmed findings together, prioritized by severity, with evidence and recommendations. Let the user choose which to address, then resolve them one at a time.
+
+Once the review is resolved and fresh checks pass, ask for final confirmation; on confirmation, mark the spec `completed` and stop.
