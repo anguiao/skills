@@ -142,5 +142,4 @@ A browser-based companion for showing mockups, diagrams, visual options, and int
 
 A question about a UI topic is not automatically a visual question. "What does personality mean in this context?" is a conceptual question — use the conversation. "Which wizard layout works better?" is a visual question — show the layouts in the browser, then ask the user to answer in the conversation.
 
-If they agree to the companion, read the detailed guide before proceeding:
-`visual-companion.md`
+If they agree, read [the visual companion guide](./visual-companion.md) before proceeding.
