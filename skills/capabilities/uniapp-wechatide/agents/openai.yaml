@@ -1,0 +1,4 @@
+interface:
+  display_name: "uni-app WeChat DevTools"
+  short_description: "Connect uni-app builds to WeChat DevTools safely"
+  default_prompt: "Use $uniapp-wechatide to build this uni-app project and verify its mp-weixin output in WeChat DevTools."
