@@ -9,8 +9,8 @@ For each user-selected topic, inspect the relevant spec, code, tests, and contex
 
 Queue material issues outside the current topic; once it is resolved, let the user choose whether to review the next queued issue.
 
-When the user has no more topics, use one fresh subagent when available to review the fixed scope and review-stage changes for spec fidelity, code quality, and regression risk. Give it only the current spec, scope, and raw implementation, and tell it to return all material findings without making changes.
+When the user has no more topics, conduct a closing review of the fixed scope and review-stage changes for spec fidelity, code quality, and regression risk. Use one fresh subagent whenever delegation is available; give it only the current spec, scope, and raw implementation, and tell it to return all material findings without making changes.
 
 Verify the findings against the codebase, then present all confirmed findings together, prioritized by severity, with evidence and recommendations. Let the user choose which to address, then resolve them one at a time.
 
-Once the review is resolved and fresh checks pass, ask for final confirmation; on confirmation, mark the spec `completed` and stop.
+Only after the closing review is resolved and fresh checks pass, ask for final confirmation; on confirmation, mark the spec `completed` and stop.
