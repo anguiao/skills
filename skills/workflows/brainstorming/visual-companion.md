@@ -24,6 +24,12 @@ Decide per-question, not per-session. The test: **would the user understand this
 
 A question *about* a UI topic is not automatically a visual question. "What kind of wizard do you want?" is conceptual — use the conversation. "Which of these wizard layouts feels right?" is visual — show the layouts in the browser, then ask the user to answer in the conversation.
 
+## Offering the Companion
+
+Ask before starting a browser preview unless the user has already requested or accepted one. Make the offer a separate message and wait for the answer; if declined, continue text-only until the user asks again.
+
+After acceptance, start the server and share its complete URL. Do not open the browser automatically.
+
 ## How It Works
 
 The server watches a directory for HTML files and serves the newest one to the browser. You write HTML content to `screen_dir`, and the user sees it in their browser. Label alternatives clearly (for example A, B, and C), then ask the user to respond in the conversation.
