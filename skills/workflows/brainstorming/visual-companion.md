@@ -276,6 +276,10 @@ vertically.
 - For iterations: append version suffix like `layout-v2.html`, `layout-v3.html`
 - Server serves newest file by modification time
 
+## Saving Designs
+
+When a design is adopted, save it with the spec following [Visual Aids](./SKILL.md#visual-aids). Include the resources needed to preserve its appearance and interactions, and ensure the saved prototype works independently of the preview session.
+
 ## Cleaning Up
 
 ```bash

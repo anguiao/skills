@@ -11,6 +11,8 @@ Start by understanding the current project context, then ask questions one at a 
 
 <HARD-GATE>
 Do NOT write implementation code, scaffold a project, commit changes, invoke another workflow, or take any implementation action while using this skill. Finish with one draft spec and return control to the user.
+
+Design-only prototypes with simulated interactions are allowed as spec resources.
 </HARD-GATE>
 
 ## Scale the Process to the Task
@@ -26,7 +28,7 @@ You MUST create a task for each of these items and complete them in order:
 3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 4. **Propose 2-3 approaches** — with trade-offs and your recommendation
 5. **Present design** — in sections scaled to their complexity, get user approval after each section
-6. **Write one draft spec** — use the requested or repository-standard location; otherwise save to `docs/specs/YYYY-MM-DD-<topic>.md`
+6. **Write one draft spec** — save the design and any adopted resources together in one spec directory
 7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
 8. **Return control** — ask the user to review the draft spec, then stop
 
@@ -103,18 +105,19 @@ digraph brainstorming {
 **Documentation:**
 
 - Write the validated design to the path requested by the user.
-- Otherwise, follow the repository's existing spec location and naming convention.
-- If no convention exists, save it to `docs/specs/YYYY-MM-DD-<topic>.md`.
-- Maintain one spec file and mark it as `draft` using the repository's convention. If no convention exists, use YAML frontmatter with `status: draft`.
+- Otherwise, follow the repository's spec parent directory and topic-naming convention, using one directory per new spec with `spec.md` as its entry point. Default to `docs/specs/YYYY-MM-DD-<topic>/spec.md`.
+- Keep content in the spec where practical. Store resources that need separate files in an adjacent `assets/` directory and reference them with relative links.
+- Mark the spec as `draft` using the repository's convention. If no convention exists, use YAML frontmatter with `status: draft`.
 - Do not commit the spec.
 
 **Spec Self-Review:**
 After writing the spec document, look at it with fresh eyes:
 
 1. **Placeholder scan:** Any "TBD", "TODO", incomplete sections, or vague requirements? Fix them.
-2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
+2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions? Do adopted design resources agree with the text?
 3. **Scope check:** Is this focused enough for a single coherent spec, or does it need decomposition?
 4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
+5. **Resource check:** Are adopted design resources saved with the spec and correctly linked?
 
 Fix any issues inline. No need to re-review — just fix and move on.
 
@@ -133,3 +136,5 @@ Use visuals only when they clarify a question. Honor the user's preferred medium
 - Otherwise follow [the browser companion guide](./visual-companion.md).
 
 Confirm design decisions in the conversation and record them in the draft spec.
+
+Save adopted visuals and their required dependencies under the spec's `assets/` directory so they can be viewed independently of the original conversation or preview session. Follow the selected tool's export guidance as needed. Link the resources from the relevant spec sections, adding the necessary constraints the visuals cannot express.
