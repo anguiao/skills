@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pi Worker"
+  short_description: "Delegate tasks to Pi and review their results"
+  default_prompt: "Use $pi-worker to delegate this task to Pi and verify the result."
